@@ -76,15 +76,15 @@ def get_entry(client):
 
 def add(client, phone_book, lock):
     ent, is_correct = get_entry(client)
-    if (ent.name == "" and
-        ent.surname == "" and
+    if (ent.surname == "" and
+        ent.name == "" and
         ent.patronymic == "" and
         ent.number == ""):
         send_message(client, "The empty entry will not be added")
         return
     if is_correct:
-        if (ent.name == "" and
-        ent.surname == "" and
+        if (ent.surname == "" and
+        ent.name == "" and
         ent.patronymic == "" and
         ent.number == ""):
             send_message(client, "The empty entry will not be added")
@@ -102,8 +102,8 @@ def search(client, phone_book, lock):
     ent, is_correct = get_entry(client)
     if is_correct:
         lock.acquire()
-        l = phone_book.search(ent.name,
-                              ent.surname,
+        l = phone_book.search(ent.surname,
+                              ent.name,
                               ent.patronymic,
                               ent.number)
         lock.release()
@@ -118,7 +118,7 @@ def delete(client, phone_book, lock):
     ent, is_correct = get_entry(client)
     if is_correct:
         lock.acquire()
-        phone_book.delete(ent.name, ent.surname, ent.patronymic, ent.number)
+        phone_book.delete(ent.surname, ent.name, ent.patronymic, ent.number)
         phone_book.save()
         lock.release()
         send_message(client, "All entries which meet the requirements were deleted")

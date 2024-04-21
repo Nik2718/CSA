@@ -3,9 +3,9 @@ import pickle
 import os
 
 class Entry:
-    def __init__(self, name, surname, patronymic, number, note):
-        self.name = name
+    def __init__(self, surname, name, patronymic, number, note):
         self.surname = surname
+        self.name = name
         self.patronymic = patronymic
         self.number = number
         self.note = note
@@ -13,15 +13,15 @@ class Entry:
     def __eq__(self, other):
         if not isinstance(other, Entry):
             return NotImplemented
-        return (self.name == other.name and
-                self.surname == other.surname and
+        return (self.surname == other.surname and
+                self.name == other.name and
                 self.patronymic == other.patronymic and
                 self.number == other.number and
                 self.note == other.note)
 
     def __str__(self):
         result = ""
-        for s in (self.name, self.surname, self.patronymic,
+        for s in (self.surname, self.name, self.patronymic,
                   self.number):
             result+=str(s)
             result += "; "
@@ -41,13 +41,13 @@ class Book:
             if ent not in self.catalogue:
                 self.catalogue.append(ent)
 
-    def delete(self, name, surname, patronymic, number):
+    def delete(self, surname, name, patronymic, number):
         catalogue_size = len(self.catalogue)
         i = 0
         while i < catalogue_size:
             ent = self.catalogue[i]
-            is_selected = (name in ("", ent.name) and
-                           surname in ("", ent.surname) and
+            is_selected = (surname in ("", ent.surname) and
+                           name in ("", ent.name) and
                            patronymic in ("", ent.patronymic) and
                            number in ("", ent.number))
             if is_selected:
@@ -56,14 +56,14 @@ class Book:
             else:
                 i = i + 1
 
-    def search(self, name="", 
-                     surname="",
+    def search(self, surname="", 
+                     name="",
                      patronymic="",
                      number=""):
         result_list = []
         for ent in self.catalogue:
-            is_selected = (name in ("", ent.name) and
-                           surname in ("", ent.surname) and
+            is_selected = (surname in ("", ent.surname) and
+                           name in ("", ent.name) and
                            patronymic in ("", ent.patronymic) and
                            number in ("", ent.number))
             if is_selected:
