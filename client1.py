@@ -1,5 +1,4 @@
 import socket
-import book
 
 MESSAGE_LENGTH = 64
 SERVER_PORT = 5050
@@ -23,8 +22,6 @@ def get_message(client):
         message = client.recv(length).decode(FORMAT)
     return message
 
-
-
 def get_list(client):
     answer = get_message(client)
     list_length = int(get_message(client))
@@ -33,14 +30,15 @@ def get_list(client):
         l.append(get_message(client))
     return (l, answer)
 
-
 def input_entry():
     print("Input name; surname; patronymic; number; note")
-    print("A field can be empty, but each ';' is necessary")
-    s = input(">")
+    print("If a field can be arbitrary, leave it empty")
+    print("Anyway there must be 4 semicolons")
+    print("If a command was SEARCH or DELETE, 'note' field will be ignored")
+    s = input("...")
     return s
 
-def add(client):
+def add(client,):
     send_message(client, "ADD")
     s = input_entry()
     send_message(client, s)
@@ -69,7 +67,6 @@ def display(client):
     for ent in l:
         print(ent)
 
-
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(SERVER_ADDR)
 
@@ -79,8 +76,7 @@ print("Type H to get a list of commands")
 proceed = True
 while proceed:
     command = input(">")
-    command = command.replace(" ", "")
-    command = command.replace("\t", "")
+    command = command.strip()
     if command == "ADD":
         add(client)
     elif command == "SEARCH":
@@ -90,11 +86,11 @@ while proceed:
     elif command == "DISPLAY":
         display(client)
     elif command == "H":
-        print("ADD...")
-        print("SEARCH...")
-        print("DELETE...")
-        print("QUIT...")
-        print("H...")
+        print("ADD - to add new entry")
+        print("SEARCH - to search for all entries which meet the requirements")
+        print("DELETE - to delete all entries which meet the requirements")
+        print("QUIT - to disconnect with the server")
+        print("H - to show a list of commands")
     elif command == "QUIT":
         send_message(client, "QUIT")
         print("Disconnection")

@@ -23,11 +23,9 @@ class Entry:
         result = ""
         for s in (self.name, self.surname, self.patronymic,
                   self.number):
-            if s != None:
-                result+=str(s)
+            result+=str(s)
             result += "; "
-        if self.note != None:
-            result += str(self.note)
+        result += str(self.note)
         return result
 
 class Book:
@@ -43,21 +41,31 @@ class Book:
             if ent not in self.catalogue:
                 self.catalogue.append(ent)
 
-    def delete(self, ent):
-        if isinstance(ent, Entry):
-            if ent in self.catalogue:
-                self.catalogue.remove(ent)
+    def delete(self, name, surname, patronymic, number):
+        catalogue_size = len(self.catalogue)
+        i = 0
+        while i < catalogue_size:
+            ent = self.catalogue[i]
+            is_selected = (name in ("", ent.name) and
+                           surname in ("", ent.surname) and
+                           patronymic in ("", ent.patronymic) and
+                           number in ("", ent.number))
+            if is_selected:
+                self.catalogue.pop(i)
+                catalogue_size = catalogue_size - 1
+            else:
+                i = i + 1
 
-    def search(self, name=None, 
-                     surname=None,
-                     patronymic=None,
-                     number=None):
+    def search(self, name="", 
+                     surname="",
+                     patronymic="",
+                     number=""):
         result_list = []
         for ent in self.catalogue:
-            is_selected = (name in (None, ent.name) and
-                           surname in (None, ent.surname) and
-                           patronymic in (None, ent.patronymic) and
-                           number in (None, ent.number))
+            is_selected = (name in ("", ent.name) and
+                           surname in ("", ent.surname) and
+                           patronymic in ("", ent.patronymic) and
+                           number in ("", ent.number))
             if is_selected:
                 result_list.append(ent)
         return result_list

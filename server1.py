@@ -5,7 +5,7 @@ import book
 
 MESSAGE_LENGTH = 64
 PORT = 5050
-SERVER_IP = socket.gethostbyname(socket.gethostname())
+SERVER_IP = "127.0.0.1"
 SERVER_ADDR = (SERVER_IP, PORT)
 FORMAT = "utf-8"
 MAXIMUM_NUMBER_OF_CLIENTS = 10
@@ -16,7 +16,7 @@ def start(server, phone_book):
     lock = threading.Lock()
     while True:
         client, client_addr = server.accept()
-        thread = threading.Thread(target=handle_client, 
+        thread = threading.Thread(target=handle_client,
                                   args=(client, client_addr, phone_book, lock))
         thread.start()
         print(f"Active connections {threading.active_count() - 1}")
@@ -45,6 +45,7 @@ def get_message(client):
         message = client.recv(length).decode(FORMAT)
         #client.send("Message received".encode(FORMAT))
         return message
+    return ""
 
 def send_message(client, message):
     message = str(message)
@@ -68,14 +69,27 @@ def get_entry(client):
     message = get_message(client)
     l = message.split(";")
     if len(l) != 5:
-        return (book.Entry(None, None, None, None, None), False)
-    for element in l:
-        element = element.strip()
-    return (book.Entry(l(0), l(1), l(2), l(3), l(4)), True)
+        return (book.Entry("", "", "", "", ""), False)
+    for i in range(0,5):
+        l[i] = l[i].strip()
+    return (book.Entry(l[0], l[1], l[2], l[3], l[4]), True)
 
 def add(client, phone_book, lock):
     ent, is_correct = get_entry(client)
+    if (ent.name == "" and
+        ent.surname == "" and
+        ent.patronymic == "" and
+        ent.number == ""):
+        send_message(client, "The empty entry will not be added")
+        return
     if is_correct:
+        if (ent.name == "" and
+        ent.surname == "" and
+        ent.patronymic == "" and
+        ent.number == ""):
+            send_message(client, "The empty entry will not be added")
+            return
+
         lock.acquire()
         phone_book.add(ent)
         phone_book.save()
@@ -88,13 +102,13 @@ def search(client, phone_book, lock):
     ent, is_correct = get_entry(client)
     if is_correct:
         lock.acquire()
-        l = phone_book.search(ent.name, 
+        l = phone_book.search(ent.name,
                               ent.surname,
                               ent.patronymic,
                               ent.number)
         lock.release()
         if l == []:
-            send_list(client, l, "No relevant data")
+            send_list(client, l, "No data")
         else:
             send_list(client, l, "The result of the search query")
     else:
@@ -104,13 +118,12 @@ def delete(client, phone_book, lock):
     ent, is_correct = get_entry(client)
     if is_correct:
         lock.acquire()
-        phone_book.delete(ent)
+        phone_book.delete(ent.name, ent.surname, ent.patronymic, ent.number)
         phone_book.save()
         lock.release()
-        send_message(client, "An element was deleted")
+        send_message(client, "All entries which meet the requirements were deleted")
     else:
         send_message(client, "An incorrect query")
-
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(SERVER_ADDR)
