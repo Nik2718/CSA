@@ -32,6 +32,8 @@ def handle_client(client, client_addr, phone_book, lock):
             add(client, phone_book, lock)
         elif message == "SEARCH":
             search(client, phone_book, lock)
+        elif message == "SEARCH_NOTE":
+            search_note(client, phone_book, lock)
         elif message == "DELETE":
             delete(client, phone_book, lock)
         else:
@@ -113,6 +115,19 @@ def search(client, phone_book, lock):
             send_list(client, l, "The result of the search query")
     else:
         send_list(client, [], "An incorrect query")
+
+def search_note(client, phone_book, lock):
+    text = get_message(client)
+    if text == "":
+        send_list(client, [], "Empty text")
+        return
+    lock.acquire()
+    l = phone_book.search_note(text)
+    lock.release()
+    if l == []:
+        send_list(client, l, "No data")
+    else:
+        send_list(client, l, "The result of the search in notes")
 
 def delete(client, phone_book, lock):
     ent, is_correct = get_entry(client)

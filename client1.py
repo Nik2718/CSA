@@ -30,23 +30,30 @@ def get_list(client):
         l.append(get_message(client))
     return (l, answer)
 
-
-def add(client, input_string):
+def add(client, data_string):
     send_message(client, "ADD")
-    send_message(client, input_string)
+    send_message(client, data_string)
     print(get_message(client))
 
-def search(client, input_string):
+def search(client, data_string):
     send_message(client, "SEARCH")
-    send_message(client, input_string)
+    send_message(client, data_string)
     l, answer = get_list(client)
     print(answer)
     for ent in l:
-        print(ent)
+        print(str(ent)+"\n")
 
-def delete(client, input_string):
+def search_note(client, note):
+    send_message(client, "SEARCH_NOTE")
+    send_message(client, note)
+    l, answer = get_list(client)
+    print(answer)
+    for ent in l:
+        print(str(ent)+"\n")
+
+def delete(client, data_string):
     send_message(client, "DELETE")
-    send_message(client, input_string)
+    send_message(client, data_string)
     print(get_message(client))
 
 def display(client):
@@ -55,7 +62,45 @@ def display(client):
     l, answer = get_list(client)
     print(answer)
     for ent in l:
-        print(ent)
+        print(str(ent)+"\n")
+
+def print_help():
+    print("""\
+    ------------------------------
+    ADD - to add a new entry
+    \tADD surname; name; patronymic; number; note
+    \tIf a field is unknown, leave it empty
+    \tAnyway there must be 4 semicolons
+    ------------------------------
+    SEARCH - to search for all entries which meet the requirements
+    \tSEARCH surname; name; patronymic; number; ignored
+    \tIf a field can be arbitrary, leave it empty
+    \tAnyway there must be 4 semicolons
+    \tData after the 4-th semicolon will be ignored
+    ------------------------------
+    SEARCH_NOTE - to search a piece of text in all notes of the phone book
+    \tSEARCH_NOTE text
+    ------------------------------
+    DELETE - to delete all entries which meet the requirements
+    \tDELETE surname; name; patronymic; number; ignored
+    \tIf a field can be arbitrary, leave it empty
+    \tAnyway there must be 4 semicolons
+    \tData after the 4-th semicolon will be ignored
+    ------------------------------
+    DISPLAY - to show the entire phone book
+    ------------------------------
+    QUIT - to disconnect with the server
+    ------------------------------
+    H - to show a list of commands
+    ------------------------------""")
+
+def divide_input(input_string):
+    input_string = input_string.strip()
+    command = input_string.split(' ')[0]
+    command = command.split('\t')[0]
+    data_string = input_string[len(command):len(input_string)]
+    data_string = data_string.strip()
+    return (command, data_string)
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(SERVER_ADDR)
@@ -66,47 +111,20 @@ print("Type H to get a list of commands")
 do_proceed = True
 while do_proceed:
     input_string = input(">")
-
-    #Divide a command from data
-    input_string = input_string.strip()
-    command = input_string.split(' ')[0]
-    command = command.split('\t')[0]
-    input_string = input_string[len(command):len(input_string)]
-    input_string = input_string.strip()
+    command, data_string = divide_input(input_string)
 
     if command == "ADD":
-        add(client, input_string)
+        add(client, data_string)
     elif command == "SEARCH":
-        search(client, input_string)
+        search(client, data_string)
+    elif command == "SEARCH_NOTE":
+        search_note(client, data_string)
     elif command == "DELETE":
-        delete(client, input_string)
+        delete(client, data_string)
     elif command == "DISPLAY":
         display(client)
     elif command == "H":
-        print("------------------------------")
-        print("ADD - to add new entry")
-        print("\tADD surname; name, patronymic; number; note")
-        print("\tIf a field is unknown, leave it empty")
-        print("\tAnyway there must be 4 semicolons")
-        print("------------------------------")
-        print("SEARCH - to search for all entries which meet the requirements")
-        print("\tSEARCH surname; name, patronymic; number; ignored")
-        print("\tIf a field can be arbitrary, leave it empty")
-        print("\tAnyway there must be 4 semicolons")
-        print("\tData after the 4-th semicolon will be ignored")
-        print("------------------------------")
-        print("DELETE - to delete all entries which meet the requirements")
-        print("\tDELETE surname; name, patronymic; number; ignored")
-        print("\tIf a field can be arbitrary, leave it empty")
-        print("\tAnyway there must be 4 semicolons")
-        print("\tData after the 4-th semicolon will be ignored")
-        print("------------------------------")
-        print("DISPLAY - to show the entire phone book")
-        print("------------------------------")
-        print("QUIT - to disconnect with the server")
-        print("------------------------------")
-        print("H - to show a list of commands")
-        print("------------------------------")
+        print_help()
     elif command == "QUIT":
         send_message(client, "QUIT")
         print("Disconnection")

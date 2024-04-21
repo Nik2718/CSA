@@ -4,11 +4,11 @@ import os
 
 class Entry:
     def __init__(self, surname, name, patronymic, number, note):
-        self.surname = surname
-        self.name = name
-        self.patronymic = patronymic
-        self.number = number
-        self.note = note
+        self.surname = str(surname)
+        self.name = str(name)
+        self.patronymic = str(patronymic)
+        self.number = str(number)
+        self.note = str(note)
 
     def __eq__(self, other):
         if not isinstance(other, Entry):
@@ -67,6 +67,14 @@ class Book:
                            patronymic in ("", ent.patronymic) and
                            number in ("", ent.number))
             if is_selected:
+                result_list.append(ent)
+        return result_list
+
+    def search_note(self, text):
+        text = str(text)
+        result_list = []
+        for ent in self.catalogue:
+            if ent.note.find(text) >= 0:
                 result_list.append(ent)
         return result_list
 
