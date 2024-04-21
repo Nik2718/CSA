@@ -48,7 +48,7 @@ class Book:
             if ent in self.catalogue:
                 self.catalogue.remove(ent)
 
-    def select(self, name=None, 
+    def search(self, name=None, 
                      surname=None,
                      patronymic=None,
                      number=None):

@@ -8,6 +8,7 @@ SERVER_IP = "127.0.0.1"
 SERVER_ADDR = (SERVER_IP, SERVER_PORT)
 
 def send_message(client, message):
+    message = str(message)
     message = message.encode(FORMAT)
     message_length = len(message)
     sent_length = str(message_length).encode(FORMAT)
@@ -22,21 +23,14 @@ def get_message(client):
         message = client.recv(length).decode(FORMAT)
     return message
 
-def get_entry(client):
-    name = get_message(client)
-    surname = get_message(client)
-    patronymic = get_message(client)
-    number = get_message(client)
-    note = get_message(client)
-    ent = book.Entry(name, surname, patronymic, number, note)
-    return ent
+
 
 def get_list(client):
     answer = get_message(client)
     list_length = int(get_message(client))
     l = []
     for i in range(0, list_length):
-        l.append(get_entry(client))
+        l.append(get_message(client))
     return (l, answer)
 
 
@@ -68,7 +62,8 @@ def delete(client):
     print(get_message(client))
 
 def display(client):
-    send_message(client, "DISPLAY")
+    send_message(client, "SEARCH")
+    send_message(client, ";;;;")
     l, answer = get_list(client)
     print(answer)
     for ent in l:
