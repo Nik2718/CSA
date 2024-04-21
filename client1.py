@@ -38,7 +38,7 @@ def input_entry():
     s = input("...")
     return s
 
-def add(client,):
+def add(client):
     send_message(client, "ADD")
     s = input_entry()
     send_message(client, s)
