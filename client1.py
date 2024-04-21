@@ -30,33 +30,23 @@ def get_list(client):
         l.append(get_message(client))
     return (l, answer)
 
-def input_entry():
-    print("Input name; surname; patronymic; number; note")
-    print("If a field can be arbitrary, leave it empty")
-    print("Anyway there must be 4 semicolons")
-    print("If a command was SEARCH or DELETE, 'note' field will be ignored")
-    s = input("...")
-    return s
 
-def add(client):
+def add(client, input_string):
     send_message(client, "ADD")
-    s = input_entry()
-    send_message(client, s)
+    send_message(client, input_string)
     print(get_message(client))
 
-def search(client):
+def search(client, input_string):
     send_message(client, "SEARCH")
-    s = input_entry()
-    send_message(client, s)
+    send_message(client, input_string)
     l, answer = get_list(client)
     print(answer)
     for ent in l:
         print(ent)
 
-def delete(client):
+def delete(client, input_string):
     send_message(client, "DELETE")
-    s = input_entry()
-    send_message(client, s)
+    send_message(client, input_string)
     print(get_message(client))
 
 def display(client):
@@ -73,28 +63,54 @@ client.connect(SERVER_ADDR)
 print("Enter your request")
 print("Type H to get a list of commands")
 
-proceed = True
-while proceed:
-    command = input(">")
-    command = command.strip()
+do_proceed = True
+while do_proceed:
+    input_string = input(">")
+
+    #Divide a command from data
+    input_string = input_string.strip()
+    command = input_string.split(' ')[0]
+    command = command.split('\t')[0]
+    input_string = input_string[len(command):len(input_string)]
+    input_string = input_string.strip()
+
     if command == "ADD":
-        add(client)
+        add(client, input_string)
     elif command == "SEARCH":
-        search(client)
+        search(client, input_string)
     elif command == "DELETE":
-        delete(client)
+        delete(client, input_string)
     elif command == "DISPLAY":
         display(client)
     elif command == "H":
+        print("------------------------------")
         print("ADD - to add new entry")
+        print("\tADD name; surname, patronymic; number; note")
+        print("\tIf a field is unknown, leave it empty")
+        print("\tAnyway there must be 4 semicolons")
+        print("------------------------------")
         print("SEARCH - to search for all entries which meet the requirements")
+        print("\tSEARCH name; surname, patronymic; number; ignored")
+        print("\tIf a field can be arbitrary, leave it empty")
+        print("\tAnyway there must be 4 semicolons")
+        print("\tData after the 4-th semicolon will be ignored")
+        print("------------------------------")
         print("DELETE - to delete all entries which meet the requirements")
+        print("\tDELETE name; surname, patronymic; number; ignored")
+        print("\tIf a field can be arbitrary, leave it empty")
+        print("\tAnyway there must be 4 semicolons")
+        print("\tData after the 4-th semicolon will be ignored")
+        print("------------------------------")
+        print("DISPLAY - to show the entire phone book")
+        print("------------------------------")
         print("QUIT - to disconnect with the server")
+        print("------------------------------")
         print("H - to show a list of commands")
+        print("------------------------------")
     elif command == "QUIT":
         send_message(client, "QUIT")
         print("Disconnection")
-        proceed = False
+        do_proceed = False
     elif command == "":
         pass
     else:
