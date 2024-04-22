@@ -8,14 +8,17 @@ SERVER_ADDR = (SERVER_IP, SERVER_PORT)
 
 def send_message(client, message):
     message = str(message)
+    #send length
     message = message.encode(FORMAT)
     message_length = len(message)
+    #add whitespaces to make message_length long enough 
     sent_length = str(message_length).encode(FORMAT)
     sent_length += b' ' * (MESSAGE_LENGTH - len(sent_length))
     client.send(sent_length)
     client.send(message)
 
 def get_message(client):
+    #get message length (its own length is fixed)
     length = client.recv(MESSAGE_LENGTH).decode(FORMAT)
     if length:
         length = int(length)
@@ -30,6 +33,7 @@ def get_list(client):
         l.append(get_message(client))
     return (l, answer)
 
+#Commands
 def add(client, data_string):
     send_message(client, "ADD")
     send_message(client, data_string)
@@ -86,6 +90,7 @@ def print_help():
     \tIf a field can be arbitrary, leave it empty
     \tAnyway there must be 4 semicolons
     \tData after the 4-th semicolon will be ignored
+    \tDELETE ;;;; - to delete the entire database
     ------------------------------
     DISPLAY - to show the entire phone book
     ------------------------------
@@ -94,6 +99,7 @@ def print_help():
     H - to show a list of commands
     ------------------------------""")
 
+#Divide a command from data in a string
 def divide_input(input_string):
     input_string = input_string.strip()
     command = input_string.split(' ')[0]
@@ -102,6 +108,7 @@ def divide_input(input_string):
     data_string = data_string.strip()
     return (command, data_string)
 
+#create a socket and connect it to a server
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(SERVER_ADDR)
 

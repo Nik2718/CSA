@@ -38,8 +38,17 @@ class Book:
 
     def add(self, ent):
         if isinstance(ent, Entry):
-            if ent not in self.catalogue:
+            is_in = False
+            for row in self.catalogue:
+                is_in = (ent.surname == row.surname and
+                         ent.name == row.name and
+                         ent.patronymic == row.patronymic and
+                         ent.number == row.number)
+                if is_in == True:
+                    break
+            if is_in == False:
                 self.catalogue.append(ent)
+        return not is_in
 
     def delete(self, surname, name, patronymic, number):
         catalogue_size = len(self.catalogue)

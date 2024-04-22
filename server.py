@@ -13,19 +13,23 @@ MAXIMUM_NUMBER_OF_CLIENTS = 10
 def start(server, phone_book):
     server.listen(MAXIMUM_NUMBER_OF_CLIENTS)
     print(f"Server is listening....")
+    #create mutex
     lock = threading.Lock()
     while True:
+        #accept a client
         client, client_addr = server.accept()
         thread = threading.Thread(target=handle_client,
                                   args=(client, client_addr, phone_book, lock))
         thread.start()
         print(f"Active connections {threading.active_count() - 1}")
 
+
 def handle_client(client, client_addr, phone_book, lock):
     print(f"Client {client_addr} connected.")
     is_connected = True
     while is_connected:
         message = get_message(client)
+        #determine a command
         if message == "QUIT":
             is_connected = False
         elif message == "ADD":
@@ -41,19 +45,21 @@ def handle_client(client, client_addr, phone_book, lock):
     client.close()
 
 def get_message(client):
+    #get message length (its own length is fixed)
     length = client.recv(MESSAGE_LENGTH).decode(FORMAT)
     if length:
         length = int(length)
         message = client.recv(length).decode(FORMAT)
-        #client.send("Message received".encode(FORMAT))
         return message
     return ""
 
 def send_message(client, message):
     message = str(message)
+    #send length
     message = message.encode(FORMAT)
     message_length = len(message)
     sent_length = str(message_length).encode(FORMAT)
+    #add whitespaces to make message_length long enough 
     sent_length += b' ' * (MESSAGE_LENGTH - len(sent_length))
     client.send(sent_length)
     client.send(message)
@@ -91,24 +97,33 @@ def add(client, phone_book, lock):
         ent.number == ""):
             send_message(client, "The empty entry will not be added")
             return
-
+        
+        #Manipulation with data
+        is_successful = False
         lock.acquire()
-        phone_book.add(ent)
+        is_successful = phone_book.add(ent)
         phone_book.save()
         lock.release()
-        send_message(client, "An entry was added")
+
+        if is_successful:
+            send_message(client, "An entry was added")
+        else:
+            send_message(client, "An entry was not added")
     else:
         send_message(client, "An incorrect query")
 
 def search(client, phone_book, lock):
     ent, is_correct = get_entry(client)
     if is_correct:
+
+        #Search in data
         lock.acquire()
         l = phone_book.search(ent.surname,
                               ent.name,
                               ent.patronymic,
                               ent.number)
         lock.release()
+
         if l == []:
             send_list(client, l, "No data")
         else:
@@ -121,13 +136,17 @@ def search_note(client, phone_book, lock):
     if text == "":
         send_list(client, [], "Empty text")
         return
+
+    #Search in data
     lock.acquire()
     l = phone_book.search_note(text)
     lock.release()
+
     if l == []:
         send_list(client, l, "No data")
     else:
         send_list(client, l, "The result of the search in notes")
+
 
 def delete(client, phone_book, lock):
     ent, is_correct = get_entry(client)
@@ -140,9 +159,12 @@ def delete(client, phone_book, lock):
     else:
         send_message(client, "An incorrect query")
 
+
+#create and bind a socket
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(SERVER_ADDR)
 
+#Load a phone book
 phone_book = book.Book()
 print("Server is starting...")
 start(server, phone_book)
